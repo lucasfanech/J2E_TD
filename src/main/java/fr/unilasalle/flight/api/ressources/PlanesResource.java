@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
@@ -36,19 +37,9 @@ public class PlanesResource {
 
     @POST
     @Transactional
-    public void addPlane(
-            @QueryParam("operator") String operator,
-            @QueryParam("model") String model,
-            @QueryParam("registration") String registration,
-            @QueryParam("capacity") Integer capacity) {
-
-        Planes newPlane = new Planes();
-        newPlane.setOperator(operator);
-        newPlane.setModel(model);
-        newPlane.setRegistration(registration);
-        newPlane.setCapacity(capacity);
-
-        planesRepository.addPlane(newPlane);
+    public Response addPlane(Planes plane) {
+        planesRepository.addPlane(plane);
+        return Response.ok(plane).status(201).build();
     }
 
 }

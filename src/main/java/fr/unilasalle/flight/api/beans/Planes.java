@@ -17,22 +17,22 @@ public class Planes extends PanacheEntityBase{
 
     @Getter
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, name="operator")
     private String operator;
 
     @Getter
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, name="model")
     private String model;
 
     @Getter
     @Setter
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name="registration")
     private String registration;
 
     @Getter
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, name="capacity")
     private Integer capacity;
 
 }
