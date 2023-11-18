@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "planes")
-public class Planes extends PanacheEntityBase{
+public class Plane extends PanacheEntityBase{
 
     @Id
     @Getter

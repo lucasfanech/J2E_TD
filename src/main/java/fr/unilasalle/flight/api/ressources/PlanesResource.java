@@ -1,6 +1,6 @@
 package fr.unilasalle.flight.api.ressources;
 
-import fr.unilasalle.flight.api.beans.Planes;
+import fr.unilasalle.flight.api.beans.Plane;
 import fr.unilasalle.flight.api.repositories.PlanesRepository;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -19,25 +19,25 @@ public class PlanesResource {
     PlanesRepository planesRepository;
 
     @GET
-    public List<Planes> getAllPlanes() {
+    public List<Plane> getAllPlanes() {
         return planesRepository.findAllPlanes();
     }
 
     @GET
     @Path("/operator/{operator}")
-    public List<Planes> getPlanesByOperator(@PathParam("operator") String operator) {
+    public List<Plane> getPlanesByOperator(@PathParam("operator") String operator) {
         return planesRepository.findPlanesByOperator(operator);
     }
 
     @GET
     @Path("/registration/{registration}")
-    public Planes getPlaneByRegistration(@PathParam("registration") String registration) {
+    public Plane getPlaneByRegistration(@PathParam("registration") String registration) {
         return planesRepository.findPlaneByRegistration(registration);
     }
 
     @POST
     @Transactional
-    public Response addPlane(Planes plane) {
+    public Response addPlane(Plane plane) {
         planesRepository.addPlane(plane);
         return Response.ok(plane).status(201).build();
     }
