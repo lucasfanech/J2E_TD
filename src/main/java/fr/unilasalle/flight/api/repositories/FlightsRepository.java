@@ -31,6 +31,9 @@ public class FlightsRepository implements PanacheRepositoryBase<Flight, Integer>
 
     // delete flight in database by number
     public void deleteFlightByNumber(String number) {
+        // delete associated reservations
+        ReservationsRepository reservationsRepository = new ReservationsRepository();
+        reservationsRepository.deleteReservationByFlightId(findFlightByNumber(number).getId());
         delete(findFlightByNumber(number));
     }
 

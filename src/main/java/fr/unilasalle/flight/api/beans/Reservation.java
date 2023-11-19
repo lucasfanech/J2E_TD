@@ -20,9 +20,12 @@ public class Reservation extends PanacheEntityBase{
     @Column(nullable = false, name="flight_id")
     private Integer flight_id;
 
+
     @Getter
     @Setter
-    @Column(nullable = false, name="passenger_id")
-    private Integer passenger_id;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "passenger_id")
+    private Passenger passenger;
+
 
 }

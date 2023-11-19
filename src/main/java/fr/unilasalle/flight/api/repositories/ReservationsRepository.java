@@ -1,5 +1,6 @@
 package fr.unilasalle.flight.api.repositories;
 
+import fr.unilasalle.flight.api.beans.Passenger;
 import fr.unilasalle.flight.api.beans.Plane;
 import fr.unilasalle.flight.api.beans.Reservation;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
@@ -19,6 +20,7 @@ public class ReservationsRepository implements PanacheRepositoryBase<Reservation
         return find("id", id).firstResult();
     }
 
+
     // get reservations by flight_id
     public List<Reservation> findReservationsByFlightId(Integer flight_id) {
         return find("flight_id", flight_id).list();
@@ -29,9 +31,14 @@ public class ReservationsRepository implements PanacheRepositoryBase<Reservation
         persist(reservation);
     }
 
-    // delete reservation in database by id
-    public void deleteReservationById(Integer id) {
-        delete(findReservationById(id));
+    // delete reservation in database by flight_id
+    public void deleteReservationByFlightId(Integer flight_id) {
+        // get reservations by flight_id
+        List<Reservation> reservations = findReservationsByFlightId(flight_id);
+        // delete associated reservations
+        for (Reservation reservation : reservations) {
+            delete(reservation);
+        }
     }
 
 }
