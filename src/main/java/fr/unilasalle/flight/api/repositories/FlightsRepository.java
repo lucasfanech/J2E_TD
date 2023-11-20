@@ -18,6 +18,11 @@ public class FlightsRepository implements PanacheRepositoryBase<Flight, Integer>
         return find("number", number).firstResult();
     }
 
+    // Get flight by id
+    public Flight findFlightById(Integer id) {
+        return find("id", id).firstResult();
+    }
+
     // Get flights by destination
     public List<Flight> findFlightsByDestination(String destination) {
 

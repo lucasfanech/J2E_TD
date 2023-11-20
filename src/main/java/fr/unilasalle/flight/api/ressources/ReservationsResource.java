@@ -1,9 +1,14 @@
 package fr.unilasalle.flight.api.ressources;
 
+import fr.unilasalle.flight.api.beans.Flight;
 import fr.unilasalle.flight.api.beans.Passenger;
+import fr.unilasalle.flight.api.beans.Plane;
 import fr.unilasalle.flight.api.beans.Reservation;
+import fr.unilasalle.flight.api.repositories.FlightsRepository;
 import fr.unilasalle.flight.api.repositories.PassengersRepository;
+import fr.unilasalle.flight.api.repositories.PlanesRepository;
 import fr.unilasalle.flight.api.repositories.ReservationsRepository;
+
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -20,11 +25,19 @@ public class ReservationsResource {
     @Inject
     ReservationsRepository reservationsRepository;
 
+    @Inject
+    FlightsRepository flightsRepository;
+
+    @Inject
+    PlanesRepository planesRepository;
+
+    @Inject
+    PassengersRepository passengersRepository;
+
     @GET
     public List<Reservation> getAllReservations() {
         return reservationsRepository.findAllReservations();
     }
-
 
     @GET
     @Path("/id/{id}")
@@ -41,34 +54,43 @@ public class ReservationsResource {
     @POST
     @Transactional
     public Response addReservation(Reservation reservation) {
-        if (reservation.getPassenger() != null) {
-            // Case 1: Passenger already exists
-            reservationsRepository.addReservation(reservation);
-        } else {
-            // Case 2: Create a new passenger
-            // Check if all required fields are present
-            if (reservation.getPassenger() != null
-                    && reservation.getPassenger().getSurname() != null
-                    && reservation.getPassenger().getFirstname() != null
-                    && reservation.getPassenger().getEmail_address() != null) {
-                Passenger newPassenger = reservation.getPassenger();
-                PassengersRepository passengersRepository = new PassengersRepository();
-                passengersRepository.addPassenger(newPassenger);
+        if (reservation.getFlight_id() != null) {
+            Flight flight = flightsRepository.findFlightById(reservation.getFlight_id());
 
-                // Add the new passenger to the reservation and persist it
-                reservation.setPassenger(newPassenger);
-                reservationsRepository.addReservation(reservation);
-
-                return Response.ok(reservation).status(201).build();
+            if (flight == null) {
+                return Response.status(400).entity("Le vol n'existe pas.").build();
             } else {
-                // Return an error if a required field is missing
-                return Response.status(400).entity("Les champs nécessaires pour créer un nouveau passager sont manquants.").build();
+                Plane plane = planesRepository.findPlaneById(flight.getPlane_id());
+                if (plane.getCapacity() <= reservationsRepository.findReservationsByFlightId(reservation.getFlight_id()).size()) {
+                    return Response.status(400).entity("Le vol est complet.").build();
+                }
             }
+        } else {
+            return Response.status(400).entity("Le champ flight_id est manquant.").build();
         }
 
+        if (reservation.getPassenger() != null) {
+            Passenger existingPassenger = passengersRepository.findPassengerByEmail(reservation.getPassenger().getEmail_address());
+            if (existingPassenger != null) {
+                reservation.setPassenger(existingPassenger);
+            } else {
+                if (validatePassenger(reservation.getPassenger())) {
+                    passengersRepository.addPassenger(reservation.getPassenger());
+                } else {
+                    return Response.status(400).entity("Les champs nécessaires pour créer un nouveau passager sont manquants.").build();
+                }
+            }
+        } else {
+            return Response.status(400).entity("Le champ passenger est manquant.").build();
+        }
+
+        reservationsRepository.addReservation(reservation);
         return Response.ok(reservation).status(201).build();
     }
 
+    private boolean validatePassenger(Passenger passenger) {
+        return passenger.getSurname() != null && passenger.getFirstname() != null && passenger.getEmail_address() != null;
+    }
 
     @DELETE
     @Path("/flight_id/{flight_id}")
@@ -77,6 +99,4 @@ public class ReservationsResource {
         reservationsRepository.deleteReservationByFlightId(flight_id);
         return Response.ok().status(204).build();
     }
-
-
 }

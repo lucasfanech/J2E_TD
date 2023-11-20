@@ -8,6 +8,10 @@ import java.util.List;
 @ApplicationScoped
 public class PlanesRepository implements PanacheRepositoryBase<Plane, Integer> {
 
+    public Plane findPlaneById(Integer plane_id) {
+        return find("id", plane_id).firstResult();
+    }
+
     // Get all planes
     public List<Plane> findAllPlanes() {
         return listAll();
