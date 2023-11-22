@@ -84,6 +84,11 @@ public class ReservationsResource {
             return Response.status(400).entity("Le champ passenger est manquant.").build();
         }
 
+        // Check if reservation already exists by flight_id and passenger_email_address
+        Reservation checkReservation = reservationsRepository.findReservationsByFlightId(reservation.getFlight_id()).stream().filter(reservation1 -> reservation1.getPassenger().getEmail_address().equals(reservation.getPassenger().getEmail_address())).findFirst().orElse(null);
+        if (checkReservation != null) {
+            return Response.status(400).entity("La réservation existe déjà.").build();
+        }
         reservationsRepository.addReservation(reservation);
         return Response.ok(reservation).status(201).build();
     }
@@ -96,6 +101,10 @@ public class ReservationsResource {
     @Path("/flight_id/{flight_id}")
     @Transactional
     public Response deleteReservationByFlightId(@PathParam("flight_id") Integer flight_id) {
+        // if no reservation found, return 400 error Response
+        if (reservationsRepository.findReservationsByFlightId(flight_id) == null || reservationsRepository.findReservationsByFlightId(flight_id).isEmpty()) {
+            return Response.status(400).entity("No reservation found with flight id " + flight_id).build();
+        }
         reservationsRepository.deleteReservationByFlightId(flight_id);
         return Response.ok().status(204).build();
     }
